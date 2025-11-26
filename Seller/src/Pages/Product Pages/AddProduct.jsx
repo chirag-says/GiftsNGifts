@@ -16,9 +16,10 @@ function AddProduct() {
   const [images, setImages] = useState([]);
   const [openAddCategoryModal, setOpenAddCategoryModal] = useState(false);
   const [openAddSubCategoryModal, setOpenAddSubCategoryModal] = useState(false);
-  const [approved,setApproved]=useState(false);
+  const [approved, setApproved] = useState(false);
   const stoken = localStorage.getItem('stoken') || "null";
 
+  // ⭐ Added stock in state
   const [Product, setProduct] = useState({
     title: "",
     description: "",
@@ -31,6 +32,7 @@ function AddProduct() {
     brand: "",
     size: "",
     additional_details: "",
+    stock: "",            // ⭐ added here
     images: []
   });
 
@@ -96,11 +98,13 @@ function AddProduct() {
   const addproduct = async () => {
     try {
       const formData = new FormData();
+
       Object.entries(Product).forEach(([key, value]) => {
         if (key !== "images") {
           formData.append(key, value);
         }
       });
+
       images.forEach((img) => formData.append("images", img));
 
       const response = await axios.post(
@@ -110,12 +114,13 @@ function AddProduct() {
       );
 
       if (response.data.success) {
-        alert('Product added successfully!');
+        alert("Product added successfully!");
+        window.location.reload(); // ⭐ refresh page after adding
       }
 
     } catch (error) {
-      console.error('Error adding product:', error.response || error);
-      alert('Failed to add product. Check the console for more details.');
+      console.error("Error adding product:", error.response || error);
+      alert("Failed to add product. Check the console for more details.");
     }
   };
 
@@ -130,34 +135,35 @@ function AddProduct() {
     setOpenAddSubCategoryModal(false);
     fetchSubcategories();
   };
-  useEffect(()=>{
+
+  useEffect(() => {
     fetchSeller();
+  }, []);
 
-  },[])
-
-  
-const fetchSeller=async(req,res)=>{
-     res=await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/seller/sellerdetails`,{headers:{stoken}})
-    if(res.data.success){
-    
-      setApproved(res.data.seller[0].approved)
+  const fetchSeller = async (req, res) => {
+    res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/seller/sellerdetails`, { headers: { stoken } })
+    if (res.data.success) {
+      setApproved(res.data.seller[0].approved);
     }
   }
-if (!approved) {
-  return (
-    <div className="min-h-[80vh] flex items-center justify-center">
-  <div className="bg-red-50 border !py-16  border-red-300 text-red-700 text-center !px-10 rounded-lg shadow-md max-w-xl w-full">
-    <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
-    <p>You are not approved to add products.</p>
-    <p>Please contact the administrator for approval.</p>
-  </div>
-</div>
 
-  );
-}
+  if (!approved) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="bg-red-50 border !py-16 border-red-300 text-red-700 text-center !px-10 rounded-lg shadow-md max-w-xl w-full">
+          <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+          <p>You are not approved to add products.</p>
+          <p>Please contact the administrator for approval.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <section className="p-4 md:p-6 lg:p-10 bg-gray-50">
       <form className="mx-auto w-full md:w-[90%] lg:w-[70%]">
+
+        {/* Title */}
         <div className="mb-4">
           <label className="text-sm font-semibold mb-1 block">Product Title</label>
           <input
@@ -169,6 +175,7 @@ if (!approved) {
           />
         </div>
 
+        {/* Description */}
         <div className="mb-4">
           <label className="text-sm font-semibold mb-1 block">Product Description</label>
           <textarea
@@ -178,20 +185,23 @@ if (!approved) {
             className="w-full p-3 text-sm border bg-white h-24"
           />
         </div>
-        <div className="grid grid-cols-1  md:grid-cols-2 gap-4 mb-4">
-        <div className=" !bg-gray-200  hover:border hover:border-gray-300  !py-2 !w-full text-center !text-black rounded">
-          <Button className='!text-black ' onClick={handleOpenCategoryModal}>
-            + Create New Category
-          </Button>
-        </div> 
-         <div className=" !bg-gray-200 hover:border hover:border-gray-300 !py-2 !w-full text-center !text-black rounded">
-            <Button className='!text-black' onClick={handleOpenSubCategoryModal}>
+
+        {/* Category Buttons */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="!bg-gray-200 hover:border hover:border-gray-300 !py-2 text-center !text-black rounded">
+            <Button className="!text-black" onClick={handleOpenCategoryModal}>
+              + Create New Category
+            </Button>
+          </div>
+          <div className="!bg-gray-200 hover:border hover:border-gray-300 !py-2 text-center !text-black rounded">
+            <Button className="!text-black" onClick={handleOpenSubCategoryModal}>
               + Create New Subcategory
             </Button>
           </div>
-          </div>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2  gap-4 mb-4">
+        {/* Category + Subcategory */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <Autocomplete
             fullWidth
             options={categories}
@@ -215,9 +225,9 @@ if (!approved) {
               ))}
             </Select>
           </FormControl>
-         
         </div>
 
+        {/* Price Fields */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <input
             type="number"
@@ -245,6 +255,20 @@ if (!approved) {
           />
         </div>
 
+        {/* Stock Field ⭐ ADDED */}
+        <div className="mb-4">
+          <label className="text-sm font-semibold mb-1 block">Stock Available</label>
+          <input
+            type="number"
+            name="stock"
+            value={Product.stock}
+            onChange={handleChange}
+            placeholder="How many items available?"
+            className="w-full p-3 text-sm border bg-white"
+          />
+        </div>
+
+        {/* Ingredients, Brand, Size */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <input
             type="text"
@@ -272,6 +296,7 @@ if (!approved) {
           />
         </div>
 
+        {/* Additional Details */}
         <div className="mb-4">
           <input
             type="text"
@@ -283,6 +308,7 @@ if (!approved) {
           />
         </div>
 
+        {/* Images */}
         <h1 className="text-black font-bold text-xl mb-3">Upload Images</h1>
         <div className="flex flex-wrap gap-4 mb-6">
           {images.map((img, index) => (
@@ -301,6 +327,7 @@ if (!approved) {
               </button>
             </div>
           ))}
+
           <label htmlFor="multi-img" className="cursor-pointer">
             <div className="w-24 h-24 flex items-center justify-center border-2 border-dashed bg-gray-100 text-sm text-center">
               + Upload
@@ -316,6 +343,7 @@ if (!approved) {
           />
         </div>
 
+        {/* Upload Button */}
         <div className="text-center">
           <Button
             type="button"
@@ -330,21 +358,15 @@ if (!approved) {
         </div>
       </form>
 
-      <Modal
-        open={openAddCategoryModal}
-        onClose={handleCloseCategoryModal}
-        aria-labelledby="add-category-modal"
-      >
+      {/* Category Modal */}
+      <Modal open={openAddCategoryModal} onClose={handleCloseCategoryModal}>
         <Box className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-5 rounded shadow-lg w-[90%] sm:w-[500px]">
           <AddCategory onSuccess={handleCloseCategoryModal} />
         </Box>
       </Modal>
 
-      <Modal
-        open={openAddSubCategoryModal}
-        onClose={handleCloseSubCategoryModal}
-        aria-labelledby="add-subcategory-modal"
-      >
+      {/* Subcategory Modal */}
+      <Modal open={openAddSubCategoryModal} onClose={handleCloseSubCategoryModal}>
         <Box className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-5 rounded shadow-lg w-[90%] sm:w-[500px]">
           <AddSubCategory onSubCategoryAdded={handleCloseSubCategoryModal} />
         </Box>

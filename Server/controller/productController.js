@@ -1,33 +1,62 @@
 import addproductmodel from "../model/addproduct.js";
 import mongoose from "mongoose";
 import Review from "../model/review.js";
+
+// 1. ADD PRODUCT
 export const addProduct = async (req, res) => {
   try {
+    const sellerId = req.sellerId; // Assuming middleware sets this
+    if (!sellerId) return res.status(400).json({ success: false, message: "Seller auth failed" });
 
+    // Extract fields including stock
     const {
-      title, description, categoryname, subcategory, price,
-      oldprice, discount, ingredients, brand, size,
-      additional_details, images
+      title, description, categoryname, subcategory,
+      price, oldprice, discount,
+      ingredients, brand, size, additional_details,
+      stock // ⭐ Get Stock
     } = req.body;
-    
-    
 
-    if (!title || !price) {
-      return res.status(400).json({ success: false, message: "Please provide all the details" });
-    }
+    const imageArray = req.files?.images?.map(file => ({ url: file.path, altText: title })) || [];
 
     const newProduct = new addproductmodel({
-      title, description, categoryname, subcategory, price,
-      oldprice, discount, ingredients, brand, size,
-      additional_details, images
+      title, description, categoryname, subcategory,
+      price, oldprice, discount,
+      ingredients, brand, size, additional_details,
+      images: imageArray,
+      sellerId,
+      stock: Number(stock) // ⭐ Ensure Number
     });
 
-    await newProduct.save();
-    res.status(201).json({ success: true, message: "Product added successfully!", data: newProduct });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Server error", error: error.message });
+    await newProduct.save(); // Triggers pre-save hook to set "In Stock/Out of Stock"
+    res.status(201).json({ success: true, data: newProduct });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };
+
+// 2. UPDATE PRODUCT (Handles Stock Updates)
+export const updateProduct = async (req, res) => {
+  try {
+    // We fetch the document first to allow .save() hook to run properly
+    const product = await addproductmodel.findById(req.params.id);
+    if (!product) return res.status(404).json({ success: false, message: "Product not found" });
+
+    // Update fields
+    Object.keys(req.body).forEach(key => {
+        product[key] = req.body[key];
+    });
+
+    // ⭐ Save triggers the Schema pre-hook to recalculate "Low Stock" or "Out of Stock"
+    await product.save(); 
+
+    res.status(200).json({ success: true, data: product });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ... (Include your delete, get, filter functions here as before)
 
 export const getAllProducts = async (req, res) => {
   try {
@@ -131,15 +160,22 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
-export const updateProduct = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updated = await addproductmodel.findByIdAndUpdate(id, { $set: req.body }, { new: true });
-    res.status(200).json({ success: true, message: 'Product updated successfully', data: updated });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
+// export const updateProduct = async (req, res) => {
+//   try {
+//     const updated = await addproductmodel.findByIdAndUpdate(
+//       req.params.id,
+//       { $set: req.body },
+//       { new: true, runValidators: true }
+//     );
+
+//     await updated.save(); // triggers pre-save hook
+
+//     res.status(200).json({ success: true, data: updated });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
 export const createReview = async (req, res) => {
   try {
     const { productId, rating, comment, userName } = req.body;
