@@ -17,6 +17,7 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import feedbackRoutes from "./routes/feedbackRoutes.js";
 import adminRoutes from "./routes/adminRoute.js";
 import productPerformanceRoutes from "./routes/productPerformanceRoutes.js";  // ✔ FIXED
+import sellerPanelRoutes from "./routes/sellerPanelRoutes.js";  // New Seller Panel Routes
 
 
 
@@ -63,6 +64,7 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.use('/api/reports/product-performance', productPerformanceRoutes);
+app.use('/api/seller-panel', sellerPanelRoutes);  // All new seller panel routes
 
 
 app.listen(port, () => console.log(`Server started on port ${port}...`));

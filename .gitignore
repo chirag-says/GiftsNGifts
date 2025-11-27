@@ -55,3 +55,26 @@ Server/uploads/
 # OS generated files
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Package lock files (optional - uncomment if needed)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Testing
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# Debug
+.eslintcache
+*.log
+
+# Misc
+*.local
+*.bak
+*.swp
+*~
