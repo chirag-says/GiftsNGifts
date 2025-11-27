@@ -1,6 +1,8 @@
 import React, { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaBars, FaTimes, FaAngleDown } from "react-icons/fa";
+import { useNavigate, useLocation } from "react-router-dom";
+import { HiOutlineMenuAlt2 } from "react-icons/hi";
+import { IoClose } from "react-icons/io5";
+import { FiChevronDown, FiLogOut } from "react-icons/fi";
 import { RxDashboard } from "react-icons/rx";
 import {
   LuUsers,
@@ -11,11 +13,9 @@ import {
 } from "react-icons/lu";
 import { RiProductHuntLine } from "react-icons/ri";
 import { TbCategoryPlus } from "react-icons/tb";
-import { CiLogout } from "react-icons/ci";
 import { MdOutlinePayments, MdOutlineMessage, MdOutlineInsights } from "react-icons/md";
 import { PiStorefrontLight } from "react-icons/pi";
 import { HiOutlineClipboardList } from "react-icons/hi";
-import { Button } from "@mui/material";
 import { Collapse as ReactCollapse } from "react-collapse";
 import { MyContext } from "../../App.jsx";
 
@@ -195,6 +195,7 @@ function SideBar() {
   const [submenuIndex, setSubmenuIndex] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const isOpenSubmenu = (index) => {
     setSubmenuIndex((prev) => (prev === index ? null : index));
@@ -221,88 +222,117 @@ function SideBar() {
     }
   };
 
+  const isActivePath = (path) => location.pathname === path;
+
   return (
     <>
-      {/* Toggle Button */}
+      {/* Premium Toggle Button */}
       <button
         onClick={toggleSidebar}
-        className="fixed z-[1050] top-6 !left-5 sm:text-xl text-[15px] px-4 py-2 bg-white text-black rounded shadow-lg border border-gray-200 hover:bg-gray-100"
+        className="fixed z-[1050] top-5 left-4 p-2.5 bg-white text-gray-700 rounded-xl 
+                   shadow-sm border border-gray-100 hover:bg-gray-50 hover:shadow-md
+                   transition-all duration-200 ease-out group"
         aria-label="Open menu"
       >
-        <FaBars />
+        <HiOutlineMenuAlt2 className="text-xl group-hover:text-indigo-600 transition-colors" />
       </button>
 
-      {/* Overlay */}
+      {/* Premium Overlay with blur */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-40 z-[1040]"
+          className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-[1040] transition-opacity duration-300"
           onClick={closeSidebar}
-        ></div>
+        />
       )}
 
-      {/* Sidebar */}
+      {/* Premium Sidebar */}
       <div
         className={`
-          fixed top-0 left-0 w-[70vw] max-w-[400px] max-h-screen bg-white z-[1051]
-          border-r border-gray-200 transform transition-transform duration-300 ease-in-out
-          overflow-y-auto
-          scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100
+          fixed top-0 left-0 w-[320px] h-screen bg-white z-[1051]
+          shadow-2xl shadow-gray-900/10
+          transform transition-transform duration-300 ease-out
+          flex flex-col
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        <ul className="pt-2 font-semibold">
-          <li>
-            <Button
-              onClick={toggleSidebar}
-              className="float-end !py-4 font-semibold justify-end px-6 flex gap-3 text-[16px] !text-[rgba(0,0,0,0.8)] hover:bg-[#f1f1f1]"
-            >
-              <FaTimes />
-            </Button>
-          </li>
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+              <LuGift className="text-white text-lg" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-gray-900 tracking-tight">GiftNGifts</h2>
+              <p className="text-xs text-gray-500">Seller Portal</p>
+            </div>
+          </div>
+          <button
+            onClick={toggleSidebar}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
+          >
+            <IoClose className="text-xl" />
+          </button>
+        </div>
 
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4 px-3 scrollbar-thin">
           {menuSections.map((section, index) => (
-            <li key={section.title} className="px-2">
+            <div key={section.title} className="mb-1">
               <button
                 onClick={() => isOpenSubmenu(index)}
-                className="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-[15px] text-gray-800 hover:bg-[#f7f7f7]"
+                className={`
+                  w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left
+                  transition-all duration-200 ease-out group
+                  ${submenuIndex === index 
+                    ? 'bg-indigo-50 text-indigo-700' 
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
+                `}
               >
-                <section.icon className="text-[20px] text-gray-900" />
-                <div className="text-left">
-                  <p className="font-semibold text-[15px] leading-tight">{section.title}</p>
-                  {section.items[0]?.label && (
-                    <span className="text-xs text-gray-500">
-                      {section.items[0].label}
-                    </span>
-                  )}
+                <div className={`
+                  p-2 rounded-lg transition-colors
+                  ${submenuIndex === index 
+                    ? 'bg-indigo-100 text-indigo-600' 
+                    : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200 group-hover:text-gray-700'}
+                `}>
+                  <section.icon className="text-lg" />
                 </div>
-                <span className="ml-auto w-[30px] h-[30px] flex items-center justify-center">
-                  <FaAngleDown
-                    className={`transition-all ${submenuIndex === index ? "rotate-180" : ""}`}
-                  />
-                </span>
+                <span className="flex-1 font-medium text-[15px]">{section.title}</span>
+                <FiChevronDown 
+                  className={`text-gray-400 transition-transform duration-200 ${
+                    submenuIndex === index ? "rotate-180 text-indigo-500" : ""
+                  }`} 
+                />
               </button>
 
-              <ReactCollapse isOpened={submenuIndex === index} className="pl-8">
-                <div className="border-l border-gray-100 pl-4 pr-3 pb-4">
+              <ReactCollapse isOpened={submenuIndex === index}>
+                <div className="mt-1 ml-4 pl-4 border-l-2 border-gray-100 space-y-0.5">
                   {section.items.map((item) => {
                     const isInteractive = item.path || item.action;
+                    const isActive = item.path && isActivePath(item.path);
                     const ItemTag = isInteractive ? "button" : "div";
 
                     return (
                       <ItemTag
                         key={`${section.title}-${item.label}`}
                         onClick={() => isInteractive && handleItemAction(item)}
-                        className={`flex w-full items-center gap-3 py-1 text-sm ${
-                          isInteractive
-                            ? "text-gray-800 hover:text-black"
-                            : "text-gray-400 cursor-default"
-                        } ${item.highlight ? "font-semibold" : "font-normal"}`}
+                        className={`
+                          flex w-full items-center gap-3 py-2.5 px-3 rounded-lg text-sm
+                          transition-all duration-150
+                          ${isActive 
+                            ? 'bg-indigo-50 text-indigo-700 font-medium' 
+                            : isInteractive
+                              ? 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                              : 'text-gray-400 cursor-default'}
+                        `}
                       >
-                        <span className="block w-[4px] h-[4px] rounded-full bg-gray-300"></span>
+                        <span className={`
+                          w-1.5 h-1.5 rounded-full transition-colors
+                          ${isActive ? 'bg-indigo-500' : 'bg-gray-300'}
+                        `} />
                         <span className="flex-1 text-left">{item.label}</span>
-                        {item.highlight && (
-                          <span className="text-[10px] uppercase tracking-wide text-gray-400">
-                            primary
+                        {item.highlight && !isActive && (
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
+                            main
                           </span>
                         )}
                       </ItemTag>
@@ -310,23 +340,23 @@ function SideBar() {
                   })}
                 </div>
               </ReactCollapse>
-            </li>
+            </div>
           ))}
-          <li>
-            <Button className="w-full !py-3 !font-semibold !justify-start !px-6 flex gap-3 text-[16px] !text-[rgba(0,0,0,0.8)] hover:!bg-[#f1f1f1]">
-              <CiLogout className="text-[18px]" />
-              <span
-                style={{ textTransform: "initial" }}
-                onClick={() => {
-                  handleLogout();
-                  closeSidebar();
-                }}
-              >
-                Logout
-              </span>
-            </Button>
-          </li>
-        </ul>
+        </nav>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-100">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-red-600 
+                       hover:bg-red-50 rounded-xl transition-all duration-200 group"
+          >
+            <div className="p-2 bg-gray-100 group-hover:bg-red-100 rounded-lg transition-colors">
+              <FiLogOut className="text-lg text-gray-500 group-hover:text-red-500" />
+            </div>
+            <span className="font-medium text-sm">Sign Out</span>
+          </button>
+        </div>
       </div>
     </>
   );

@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import { GoGift } from "react-icons/go";
-import { FaChartSimple } from "react-icons/fa6";
-import { LiaChartPieSolid } from "react-icons/lia";
-import { BsBank2 } from "react-icons/bs";
-import { TbBrandProducthunt } from "react-icons/tb";
-import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
-import { Navigation } from 'swiper/modules';
+import { FiShoppingBag, FiDollarSign, FiTrendingUp, FiPackage } from "react-icons/fi";
 import axios from 'axios';
 
 export default function DashBordBox() {
@@ -54,65 +45,81 @@ export default function DashBordBox() {
 
   const cards = [
     {
-      icon: <GoGift className='text-[35px] text-[#3872fa]' />,
+      icon: FiShoppingBag,
       label: 'New Orders',
       amount: stats.totalOrders,
-      chartColor: '#3872fa'
+      trend: '+12%',
+      trendUp: true,
+      iconBg: 'bg-indigo-50',
+      iconColor: 'text-indigo-600',
     },
     {
-      icon: <LiaChartPieSolid className='text-[45px] text-[#10b981]' />,
-      label: 'Sales',
+      icon: FiDollarSign,
+      label: 'Total Sales',
       amount: formatCurrency(stats.totalSales),
-      chartColor: '#10b981'
+      trend: '+8.2%',
+      trendUp: true,
+      iconBg: 'bg-emerald-50',
+      iconColor: 'text-emerald-600',
     },
     {
-      icon: <BsBank2 className='text-[35px] text-[#7928ca]' />,
+      icon: FiTrendingUp,
       label: 'Revenue',
       amount: formatCurrency(stats.totalRevenue),
-      chartColor: '#7928ca'
+      trend: '+15%',
+      trendUp: true,
+      iconBg: 'bg-violet-50',
+      iconColor: 'text-violet-600',
     },
     {
-      icon: <TbBrandProducthunt className='text-[45px] text-[#3872fa]' />,
-      label: 'Total Products',
+      icon: FiPackage,
+      label: 'Products',
       amount: stats.totalProducts,
-      chartColor: '#3872fa'
+      trend: '+3',
+      trendUp: true,
+      iconBg: 'bg-amber-50',
+      iconColor: 'text-amber-600',
     }
   ];
 
   return (
-    <div className="relative">
-      <Swiper
-        navigation={{ nextEl: '.custom-next', prevEl: '.custom-prev' }}
-        modules={[Navigation]}
-        spaceBetween={15}
-        breakpoints={{
-          320: { slidesPerView: 1 },
-          480: { slidesPerView: 2 },
-          768: { slidesPerView: 3 },
-          1024: { slidesPerView: 4 }
-        }}
-        className="dashboardBoxesSlider !px-2 "
-      >
-        {cards.map((item, index) => (
-          <SwiperSlide key={index}>
-            <div className="bg-white p-4 sm:p-6 cursor-pointer rounded-md border border-[rgba(0,0,0,0.1)] flex px-10 sm:flex-row items-center gap-4 h-full">
-              {item.icon}
-              <div className="info text-center sm:text-left w-full sm:w-[70%]">
-                <h3 className="text-sm sm:text-base font-medium">{item.label}</h3>
-                <b className="text-lg sm:text-xl">{item.amount}</b>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {cards.map((item, index) => {
+        const Icon = item.icon;
+        return (
+          <div 
+            key={index}
+            className="bg-white p-6 rounded-xl border border-gray-200 shadow-soft
+                      hover:shadow-card-hover hover:border-gray-300
+                      transition-all duration-200 ease-out"
+          >
+            {/* Top row: Icon and Trend */}
+            <div className="flex items-start justify-between mb-4">
+              <div className={`p-3 ${item.iconBg} rounded-xl`}>
+                <Icon className={`text-xl ${item.iconColor}`} />
               </div>
-              <FaChartSimple className="text-[40px] sm:text-[50px]" style={{ color: item.chartColor }} />
+              <span className={`
+                text-xs font-medium px-2 py-1 rounded-full
+                ${item.trendUp 
+                  ? 'bg-emerald-50 text-emerald-700' 
+                  : 'bg-red-50 text-red-700'}
+              `}>
+                {item.trend}
+              </span>
             </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-
-      <div className="custom-prev absolute top-1/2 left-2 z-10 -translate-y-1/2 bg-gray-500/80 text-white w-5 h-12 flex items-center justify-center rounded cursor-pointer shadow">
-        <HiChevronLeft size={20} />
-      </div>
-      <div className="custom-next absolute top-1/2 right-2 z-10 -translate-y-1/2 bg-gray-500/80 text-white w-5 h-12 flex items-center justify-center rounded cursor-pointer shadow">
-        <HiChevronRight size={20} />
-      </div>
+            
+            {/* Label */}
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+              {item.label}
+            </p>
+            
+            {/* Amount */}
+            <h3 className="text-2xl font-bold text-gray-900">
+              {item.amount}
+            </h3>
+          </div>
+        );
+      })}
     </div>
   );
 }

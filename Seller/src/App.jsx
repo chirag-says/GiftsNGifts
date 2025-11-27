@@ -117,13 +117,13 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 function Layout({ children }) {
   return (
-    <section className="main h-screen w-full flex flex-col">
-      <Header /> {/* Full width header */}
-      <div className="flex w-full overflow-auto">
-        <aside>
+    <section className="main h-screen w-full flex flex-col bg-[#F9FAFB]">
+      <Header />
+      <div className="flex w-full overflow-hidden flex-1">
+        <aside className="h-full">
           <SideBar />
         </aside>
-        <main className="!w-[100%] py-2 overflow-y-auto ">
+        <main className="flex-1 py-6 px-6 overflow-y-auto bg-[#F9FAFB]">
           {children}
         </main>
       </div>

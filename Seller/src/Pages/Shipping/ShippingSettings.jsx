@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { MdLocalShipping, MdEdit, MdSave, MdClose, MdAdd, MdDelete } from "react-icons/md";
-import { FiTruck, FiMapPin, FiPackage } from "react-icons/fi";
+import { LuTruck, LuPenLine, LuSave, LuX, LuPackage, LuMapPin, LuInfo } from "react-icons/lu";
 
 function ShippingSettings() {
   const [settings, setSettings] = useState({
@@ -68,199 +67,240 @@ function ShippingSettings() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6 animate-fadeIn">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Shipping Settings</h1>
-          <p className="text-sm text-gray-500">Configure your shipping options and rates</p>
+          <h1 className="text-2xl font-semibold text-gray-900">Shipping Settings</h1>
+          <p className="text-sm text-gray-500 mt-1">Configure your shipping options and rates</p>
         </div>
         <div className="flex gap-3">
           {editing ? (
             <>
               <button
                 onClick={() => setEditing(false)}
-                className="px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all"
               >
-                <MdClose /> Cancel
+                <LuX className="w-4 h-4" /> Cancel
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-all shadow-sm disabled:opacity-50"
               >
-                <MdSave /> {saving ? "Saving..." : "Save Changes"}
+                <LuSave className="w-4 h-4" /> {saving ? "Saving..." : "Save Changes"}
               </button>
             </>
           ) : (
             <button
               onClick={() => setEditing(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 flex items-center gap-2"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-all shadow-sm"
             >
-              <MdEdit /> Edit Settings
+              <LuPenLine className="w-4 h-4" /> Edit Settings
             </button>
           )}
         </div>
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl p-5 text-white">
-          <FiTruck className="text-2xl mb-2 opacity-80" />
-          <p className="text-sm opacity-90">Free Shipping Above</p>
-          <h3 className="text-2xl font-bold">{formatINR(settings.freeShippingThreshold)}</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="relative overflow-hidden bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg shadow-indigo-200">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                <LuTruck className="w-4 h-4" />
+              </div>
+              <span className="text-xs font-medium text-white/80 uppercase tracking-wider">Free Shipping</span>
+            </div>
+            <h3 className="text-2xl font-bold">{formatINR(settings.freeShippingThreshold)}</h3>
+            <p className="text-xs text-white/60 mt-1">Minimum order value</p>
+          </div>
         </div>
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <p className="text-sm text-gray-500">Standard Shipping</p>
-          <h3 className="text-2xl font-bold text-gray-800 mt-1">{formatINR(settings.defaultShippingCost)}</h3>
+
+        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
+              <LuPackage className="w-4 h-4 text-gray-600" />
+            </div>
+            <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Standard</span>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900">{formatINR(settings.defaultShippingCost)}</h3>
         </div>
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <p className="text-sm text-gray-500">Express Shipping</p>
-          <h3 className="text-2xl font-bold text-gray-800 mt-1">{formatINR(settings.expressShippingCost)}</h3>
+
+        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+              <LuTruck className="w-4 h-4 text-amber-600" />
+            </div>
+            <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Express</span>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900">{formatINR(settings.expressShippingCost)}</h3>
         </div>
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <p className="text-sm text-gray-500">Processing Time</p>
-          <h3 className="text-2xl font-bold text-gray-800 mt-1">{settings.processingTime} days</h3>
+
+        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+              <LuMapPin className="w-4 h-4 text-emerald-600" />
+            </div>
+            <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Processing</span>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900">{settings.processingTime} days</h3>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Basic Settings */}
-        <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-5">
-          <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-            <FiTruck className="text-blue-500" /> Shipping Rates
-          </h3>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Free Shipping Threshold (₹)</label>
-            <input
-              type="number"
-              name="freeShippingThreshold"
-              value={settings.freeShippingThreshold}
-              onChange={handleChange}
-              disabled={!editing}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-50"
-              placeholder="e.g., 500"
-            />
-            <p className="text-xs text-gray-500 mt-1">Set to 0 to disable free shipping</p>
+        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-6 pb-4 border-b border-gray-100">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+              <LuTruck className="w-4 h-4 text-indigo-600" />
+            </div>
+            <h3 className="font-semibold text-gray-900">Shipping Rates</h3>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Standard Shipping Cost (₹)</label>
-            <input
-              type="number"
-              name="defaultShippingCost"
-              value={settings.defaultShippingCost}
-              onChange={handleChange}
-              disabled={!editing}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-50"
-              placeholder="e.g., 50"
-            />
-          </div>
+          <div className="space-y-5">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Free Shipping Threshold (₹)</label>
+              <input
+                type="number"
+                name="freeShippingThreshold"
+                value={settings.freeShippingThreshold}
+                onChange={handleChange}
+                disabled={!editing}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 transition-all"
+                placeholder="e.g., 500"
+              />
+              <p className="text-xs text-gray-400 mt-1">Set to 0 to disable free shipping</p>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Express Shipping Cost (₹)</label>
-            <input
-              type="number"
-              name="expressShippingCost"
-              value={settings.expressShippingCost}
-              onChange={handleChange}
-              disabled={!editing}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-50"
-              placeholder="e.g., 100"
-            />
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Standard Shipping Cost (₹)</label>
+              <input
+                type="number"
+                name="defaultShippingCost"
+                value={settings.defaultShippingCost}
+                onChange={handleChange}
+                disabled={!editing}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 transition-all"
+                placeholder="e.g., 50"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Express Shipping Cost (₹)</label>
+              <input
+                type="number"
+                name="expressShippingCost"
+                value={settings.expressShippingCost}
+                onChange={handleChange}
+                disabled={!editing}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 transition-all"
+                placeholder="e.g., 100"
+              />
+            </div>
           </div>
         </div>
 
         {/* Processing & Handling */}
-        <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-5">
-          <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-            <FiPackage className="text-purple-500" /> Processing & Handling
-          </h3>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Processing Time</label>
-            <select
-              name="processingTime"
-              value={settings.processingTime}
-              onChange={handleChange}
-              disabled={!editing}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-50"
-            >
-              <option value="same-day">Same Day</option>
-              <option value="1">1 Day</option>
-              <option value="1-2">1-2 Days</option>
-              <option value="2-3">2-3 Days</option>
-              <option value="3-5">3-5 Days</option>
-            </select>
-            <p className="text-xs text-gray-500 mt-1">Time to pack and hand over to courier</p>
+        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-6 pb-4 border-b border-gray-100">
+            <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
+              <LuPackage className="w-4 h-4 text-purple-600" />
+            </div>
+            <h3 className="font-semibold text-gray-900">Processing & Handling</h3>
           </div>
 
-          <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
-            <input
-              type="checkbox"
-              name="packagingIncluded"
-              checked={settings.packagingIncluded}
-              onChange={handleChange}
-              disabled={!editing}
-              className="w-5 h-5 text-blue-600 rounded"
-            />
+          <div className="space-y-5">
             <div>
-              <p className="font-medium text-gray-800">Gift Packaging Available</p>
-              <p className="text-sm text-gray-500">Offer gift wrapping option to customers</p>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Processing Time</label>
+              <select
+                name="processingTime"
+                value={settings.processingTime}
+                onChange={handleChange}
+                disabled={!editing}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 transition-all"
+              >
+                <option value="same-day">Same Day</option>
+                <option value="1">1 Day</option>
+                <option value="1-2">1-2 Days</option>
+                <option value="2-3">2-3 Days</option>
+              <option value="3-5">3-5 Days</option>
+              </select>
+              <p className="text-xs text-gray-400 mt-1">Time to pack and hand over to courier</p>
             </div>
-          </label>
 
-          <div className="p-4 bg-blue-50 rounded-xl">
-            <p className="text-sm text-blue-700">
-              💡 <strong>Tip:</strong> Faster processing times lead to better customer reviews!
-            </p>
+            <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+              <input
+                type="checkbox"
+                name="packagingIncluded"
+                checked={settings.packagingIncluded}
+                onChange={handleChange}
+                disabled={!editing}
+                className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500"
+              />
+              <div>
+                <p className="font-medium text-gray-900 text-sm">Gift Packaging Available</p>
+                <p className="text-xs text-gray-500">Offer gift wrapping option to customers</p>
+              </div>
+            </label>
+
+            <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-100">
+              <p className="text-sm text-indigo-700">
+                <strong>Tip:</strong> Faster processing times lead to better customer reviews!
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Shipping Zones */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6">
-        <div className="flex items-center justify-between mb-5">
-          <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-            <FiMapPin className="text-red-500" /> Shipping Zones
-          </h3>
+      <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-5 pb-4 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
+              <LuMapPin className="w-4 h-4 text-red-600" />
+            </div>
+            <h3 className="font-semibold text-gray-900">Shipping Zones</h3>
+          </div>
           {editing && (
-            <button className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-1">
-              <MdAdd /> Add Zone
+            <button className="inline-flex items-center gap-1.5 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-all">
+              + Add Zone
             </button>
           )}
         </div>
 
         {settings.shippingZones?.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <FiMapPin className="text-4xl mx-auto mb-2 opacity-50" />
-            <p>No shipping zones configured</p>
-            <p className="text-sm">Default shipping rates will apply to all locations</p>
+          <div className="text-center py-12">
+            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+              <LuMapPin className="w-6 h-6 text-gray-400" />
+            </div>
+            <p className="text-gray-900 font-medium">No shipping zones configured</p>
+            <p className="text-sm text-gray-500 mt-1">Default shipping rates will apply to all locations</p>
           </div>
         ) : (
           <div className="space-y-3">
             {settings.shippingZones?.map((zone, i) => (
-              <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+              <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
                 <div>
-                  <p className="font-medium text-gray-800">{zone.name}</p>
+                  <p className="font-medium text-gray-900">{zone.name}</p>
                   <p className="text-sm text-gray-500">{zone.states?.join(", ")}</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="font-semibold text-gray-800">{formatINR(zone.rate)}</p>
+                    <p className="font-semibold text-gray-900">{formatINR(zone.rate)}</p>
                     <p className="text-xs text-gray-500">{zone.deliveryDays} days delivery</p>
                   </div>
                   {editing && (
-                    <button className="p-2 text-red-500 hover:bg-red-100 rounded-lg">
-                      <MdDelete />
+                    <button className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                      <LuX className="w-4 h-4" />
                     </button>
                   )}
                 </div>
@@ -271,14 +311,21 @@ function ShippingSettings() {
       </div>
 
       {/* Tips */}
-      <div className="bg-green-50 border border-green-200 rounded-xl p-5">
-        <h4 className="font-semibold text-green-800 mb-2">🚚 Shipping Best Practices</h4>
-        <ul className="text-sm text-green-700 space-y-1">
-          <li>• Offer free shipping above a threshold to increase average order value</li>
-          <li>• Clearly communicate processing and delivery times</li>
-          <li>• Consider offering express shipping for last-minute gift orders</li>
-          <li>• Factor in packaging costs when setting shipping rates</li>
-        </ul>
+      <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5">
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
+            <LuInfo className="w-4 h-4 text-indigo-600" />
+          </div>
+          <div>
+            <h4 className="font-semibold text-indigo-900 text-sm mb-2">Shipping Best Practices</h4>
+            <ul className="text-sm text-indigo-700 space-y-1">
+              <li>• Offer free shipping above a threshold to increase average order value</li>
+              <li>• Clearly communicate processing and delivery times</li>
+              <li>• Consider offering express shipping for last-minute gift orders</li>
+              <li>• Factor in packaging costs when setting shipping rates</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );
