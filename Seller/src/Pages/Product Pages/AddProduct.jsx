@@ -3,7 +3,7 @@ import axios from 'axios';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import { Button, FormControl, InputLabel, CircularProgress, Snackbar, Alert } from '@mui/material';
-import { MdOutlineCloudUpload, MdClose } from 'react-icons/md';
+import { MdOutlineCloudUpload, MdClose, MdAddCircleOutline } from 'react-icons/md'; // Added MdAddCircleOutline
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import AddCategory from '../Category/AddCategory';
@@ -47,17 +47,22 @@ function AddProduct() {
   useEffect(() => {
     // Filter subcategories based on selected category
     if (Product.categoryname) {
-      const filtered = subcategories.filter(
-        sub => sub.categoryId === Product.categoryname
-      );
+      const filtered = subcategories.filter(sub => {
+        // Handle both populated and non-populated category field
+        const subCategoryId = sub.category?._id || sub.category;
+        return subCategoryId === Product.categoryname;
+      });
       setFilteredSubcategories(filtered);
       
       // Reset subcategory if it doesn't belong to the selected category
       const currentSubcategory = subcategories.find(
         sub => sub._id === Product.subcategory
       );
-      if (currentSubcategory && currentSubcategory.categoryId !== Product.categoryname) {
-        setProduct(prev => ({ ...prev, subcategory: "" }));
+      if (currentSubcategory) {
+        const currentSubCatId = currentSubcategory.category?._id || currentSubcategory.category;
+        if (currentSubCatId !== Product.categoryname) {
+          setProduct(prev => ({ ...prev, subcategory: "" }));
+        }
       }
     } else {
       setFilteredSubcategories(subcategories);
@@ -289,20 +294,23 @@ function AddProduct() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto pb-10">
       {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Add New Product</h1>
-        <p className="text-sm text-gray-500 mt-1">Fill in the details to list a new product</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Add New Product</h1>
+          <p className="text-sm text-gray-500 mt-1">Fill in the details to list a new product</p>
+        </div>
       </div>
 
-      <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); addproduct(); }}>
+      <form className="space-y-8" onSubmit={(e) => { e.preventDefault(); addproduct(); }}>
+        
         {/* Basic Details Section */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-            <h3 className="text-sm font-semibold text-gray-700">Basic Details</h3>
+            <h3 className="text-sm font-semibold text-gray-800">Basic Information</h3>
           </div>
-          <div className="p-6 space-y-5">
+          <div className="p-6 space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Product Title *</label>
               <input
@@ -335,112 +343,87 @@ function AddProduct() {
           </div>
         </div>
 
-        {/* Category Section */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        {/* Category Section - REORGANIZED BUTTONS */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-            <h3 className="text-sm font-semibold text-gray-700">Category & Classification</h3>
+            <h3 className="text-sm font-semibold text-gray-800">Category & Classification</h3>
           </div>
-          <div className="p-6 space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={handleOpenCategoryModal}
-                className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:border-gray-300 transition-all"
-              >
-                <span className="text-lg">+</span> Create New Category
-              </button>
-              <button
-                type="button"
-                onClick={handleOpenSubCategoryModal}
-                className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:border-gray-300 transition-all"
-              >
-                <span className="text-lg">+</span> Create New Subcategory
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Autocomplete
-                fullWidth
-                options={categories}
-                getOptionLabel={(option) => option.categoryname}
-                value={categories.find(cat => cat._id === Product.categoryname) || null}
-                onChange={(event, newValue) => {
-                  setProduct({ ...Product, categoryname: newValue ? newValue._id : '' });
-                  if (errors.categoryname) {
-                    setErrors({ ...errors, categoryname: null });
-                  }
-                }}
-                renderInput={(params) => (
-                  <TextField 
-                    {...params} 
-                    label="Category *" 
-                    variant="outlined"
-                    error={!!errors.categoryname}
-                    helperText={errors.categoryname}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '8px',
-                        backgroundColor: 'white',
-                      }
-                    }}
-                  />
-                )}
-              />
-
-              <FormControl fullWidth error={!!errors.subcategory}>
-                <InputLabel>Subcategory *</InputLabel>
-                <Select 
-                  value={Product.subcategory} 
-                  onChange={handleSelectChange('subcategory')}
-                  sx={{
-                    borderRadius: '8px',
-                    backgroundColor: 'white',
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              
+              {/* Category Input Column */}
+              <div className="flex flex-col">
+                <Autocomplete
+                  fullWidth
+                  options={categories}
+                  getOptionLabel={(option) => option.categoryname}
+                  value={categories.find(cat => cat._id === Product.categoryname) || null}
+                  onChange={(event, newValue) => {
+                    setProduct({ ...Product, categoryname: newValue ? newValue._id : '' });
+                    if (errors.categoryname) setErrors({ ...errors, categoryname: null });
                   }}
+                  renderInput={(params) => (
+                    <TextField 
+                      {...params} 
+                      label="Category *" 
+                      variant="outlined"
+                      error={!!errors.categoryname}
+                      helperText={errors.categoryname}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', backgroundColor: 'white' } }}
+                    />
+                  )}
+                />
+                <button
+                  type="button"
+                  onClick={handleOpenCategoryModal}
+                  className="mt-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium inline-flex items-center gap-1 self-start"
                 >
-                  {filteredSubcategories.map((sub) => (
-                    <MenuItem key={sub._id} value={sub._id}>
-                      {sub.subcategory}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors.subcategory && <p className="mt-1 text-xs text-red-500">{errors.subcategory}</p>}
-              </FormControl>
+                  <MdAddCircleOutline className="w-4 h-4" /> Create New Category
+                </button>
+              </div>
+
+              {/* Subcategory Input Column */}
+              <div className="flex flex-col">
+                <FormControl fullWidth error={!!errors.subcategory}>
+                  <InputLabel>Subcategory *</InputLabel>
+                  <Select 
+                    value={Product.subcategory} 
+                    label="Subcategory *"
+                    onChange={handleSelectChange('subcategory')}
+                    sx={{ borderRadius: '8px', backgroundColor: 'white' }}
+                  >
+                    {filteredSubcategories.map((sub) => (
+                      <MenuItem key={sub._id} value={sub._id}>
+                        {sub.subcategory}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {errors.subcategory && <p className="mt-1 text-xs text-red-500 mx-3">{errors.subcategory}</p>}
+                </FormControl>
+                <button
+                  type="button"
+                  onClick={handleOpenSubCategoryModal}
+                  className="mt-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium inline-flex items-center gap-1 self-start"
+                >
+                  <MdAddCircleOutline className="w-4 h-4" /> Create New Subcategory
+                </button>
+              </div>
+
             </div>
           </div>
         </div>
 
         {/* Pricing Section */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-            <h3 className="text-sm font-semibold text-gray-700">Pricing & Inventory</h3>
+            <h3 className="text-sm font-semibold text-gray-800">Pricing & Inventory</h3>
           </div>
           <div className="p-6 space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Final Price</label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    name="price"
-                    value={Product.price}
-                    readOnly
-                    placeholder="₹ 0.00"
-                    className="w-full px-4 py-3 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
-                  />
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                </div>
-                <p className="mt-1 text-xs text-gray-500">Calculated automatically</p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Original Price *</label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 text-sm">
-                    ₹
-                  </span>
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 text-sm">₹</span>
                   <input
                     type="number"
                     name="oldprice"
@@ -454,6 +437,7 @@ function AddProduct() {
                 </div>
                 {errors.oldprice && <p className="mt-1 text-xs text-red-500">{errors.oldprice}</p>}
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Discount %</label>
                 <div className="relative">
@@ -467,9 +451,21 @@ function AddProduct() {
                     max="100"
                     className="w-full pr-8 px-4 py-3 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
                   />
-                  <span className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500 text-sm">
-                    %
-                  </span>
+                  <span className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-500 text-sm">%</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Final Price</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    name="price"
+                    value={Product.price}
+                    readOnly
+                    placeholder="₹ 0.00"
+                    className="w-full px-4 py-3 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed font-medium"
+                  />
                 </div>
               </div>
             </div>
@@ -483,7 +479,7 @@ function AddProduct() {
                 onChange={handleChange}
                 placeholder="Enter available quantity"
                 min="0"
-                className={`w-full px-4 py-3 text-sm border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all ${
+                className={`w-full max-w-xs px-4 py-3 text-sm border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all ${
                   errors.stock ? 'border-red-300' : 'border-gray-200'
                 }`}
               />
@@ -492,13 +488,13 @@ function AddProduct() {
           </div>
         </div>
 
-        {/* Additional Details Section */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        {/* Specifications Section */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-            <h3 className="text-sm font-semibold text-gray-700">Product Specifications</h3>
+            <h3 className="text-sm font-semibold text-gray-800">Specifications</h3>
           </div>
-          <div className="p-6 space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-6 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Materials</label>
                 <input
@@ -506,7 +502,7 @@ function AddProduct() {
                   name="ingredients"
                   value={Product.ingredients}
                   onChange={handleChange}
-                  placeholder="e.g., Cotton, Wood"
+                  placeholder="e.g., Cotton"
                   className="w-full px-4 py-3 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
                 />
               </div>
@@ -533,7 +529,6 @@ function AddProduct() {
                 />
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Additional Details</label>
               <input
@@ -541,7 +536,7 @@ function AddProduct() {
                 name="additional_details"
                 value={Product.additional_details}
                 onChange={handleChange}
-                placeholder="Any extra information about the product"
+                placeholder="Any extra information..."
                 className="w-full px-4 py-3 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
               />
             </div>
@@ -549,34 +544,34 @@ function AddProduct() {
         </div>
 
         {/* Images Section */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-            <h3 className="text-sm font-semibold text-gray-700">Product Images *</h3>
+            <h3 className="text-sm font-semibold text-gray-800">Product Images *</h3>
           </div>
           <div className="p-6">
             <div className="flex flex-wrap gap-4">
               {images.map((img, index) => (
                 <div key={index} className="relative group">
                   <img
-                    className="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                    className="w-28 h-28 object-cover rounded-lg border border-gray-200 shadow-sm"
                     src={URL.createObjectURL(img)}
                     alt={`preview-${index}`}
                   />
                   <button
                     type="button"
                     onClick={() => handleImageRemove(index)}
-                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 shadow-md"
                   >
-                    <MdClose className="w-3 h-3" />
+                    <MdClose className="w-4 h-4" />
                   </button>
                 </div>
               ))}
 
               {images.length < 5 && (
                 <label htmlFor="multi-img" className="cursor-pointer">
-                  <div className="w-24 h-24 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50 text-gray-400 hover:border-indigo-400 hover:text-indigo-500 hover:bg-indigo-50 transition-all">
-                    <MdOutlineCloudUpload className="w-6 h-6 mb-1" />
-                    <span className="text-xs">Upload</span>
+                  <div className="w-28 h-28 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 text-gray-400 hover:border-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all">
+                    <MdOutlineCloudUpload className="w-8 h-8 mb-2" />
+                    <span className="text-xs font-medium">Upload Image</span>
                   </div>
                 </label>
               )}
@@ -589,52 +584,48 @@ function AddProduct() {
                 onChange={(e) => handleImageUpload(e.target.files)}
               />
             </div>
-            <div className="flex justify-between items-center mt-3">
-              <p className="text-xs text-gray-500">
-                {images.length}/5 images uploaded. Recommended size: 800x800px
-              </p>
-              {errors.images && <p className="text-xs text-red-500">{errors.images}</p>}
+            <div className="mt-4">
+               {errors.images && <p className="text-sm text-red-500 font-medium">{errors.images}</p>}
+               <p className="text-xs text-gray-500 mt-1">Upload up to 5 images. First image will be the cover.</p>
             </div>
           </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="flex justify-end">
+        {/* Submit Button - Fixed Placement */}
+        <div className="flex justify-end pt-4 border-t border-gray-200">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-indigo-600 text-white text-base font-medium rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
           >
             {isSubmitting ? (
               <>
-                <CircularProgress size={16} color="inherit" />
-                <span>Uploading Product...</span>
+                <CircularProgress size={20} color="inherit" />
+                <span>Processing...</span>
               </>
             ) : (
               <>
-                <MdOutlineCloudUpload className="w-5 h-5" />
-                <span>Upload Product</span>
+                <MdOutlineCloudUpload className="w-6 h-6" />
+                <span>Publish Product</span>
               </>
             )}
           </button>
         </div>
       </form>
 
-      {/* Category Modal */}
+      {/* Modals and Notifications remain the same */}
       <Modal open={openAddCategoryModal} onClose={handleCloseCategoryModal}>
         <Box className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-xl w-[90%] sm:w-[500px]">
           <AddCategory onSuccess={handleCloseCategoryModal} />
         </Box>
       </Modal>
 
-      {/* Subcategory Modal */}
       <Modal open={openAddSubCategoryModal} onClose={handleCloseSubCategoryModal}>
         <Box className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-xl w-[90%] sm:w-[500px]">
           <AddSubCategory onSubCategoryAdded={handleCloseSubCategoryModal} />
         </Box>
       </Modal>
 
-      {/* Notification Snackbar */}
       <Snackbar
         open={notification.open}
         autoHideDuration={6000}

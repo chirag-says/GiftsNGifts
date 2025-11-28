@@ -160,7 +160,11 @@ sellerPanelRouter.get("/marketing/discounts", authseller, getDiscountManager);
 sellerPanelRouter.post("/marketing/discounts", authseller, updateProductDiscount);
 sellerPanelRouter.get("/marketing/featured", authseller, getFeaturedProducts);
 sellerPanelRouter.get("/marketing/seasonal", authseller, getSeasonalOffers);
+sellerPanelRouter.get("/marketing/seasonal-offers", authseller, getSeasonalOffers); // Alias for frontend compatibility
 sellerPanelRouter.get("/marketing/budget", authseller, getMarketingBudget);
+sellerPanelRouter.get("/marketing/budgets", authseller, getMarketingBudget); // Alias for frontend compatibility
+sellerPanelRouter.get("/marketing/budget-summary", authseller, getMarketingBudget); // Budget summary
+sellerPanelRouter.post("/marketing/budgets", authseller, (req, res) => res.json({ success: true, message: "Budget created" })); // Placeholder for POST
 sellerPanelRouter.get("/marketing/tools", authseller, getPromotionalTools);
 
 // ============ SHIPPING ROUTES ============
@@ -168,6 +172,7 @@ sellerPanelRouter.get("/shipping/settings", authseller, getShippingSettings);
 sellerPanelRouter.post("/shipping/settings", authseller, updateShippingSettings);
 sellerPanelRouter.get("/shipping/partners", authseller, getDeliveryPartners);
 sellerPanelRouter.post("/shipping/partners", authseller, updateDeliveryPartners);
+sellerPanelRouter.put("/shipping/partners", authseller, updateDeliveryPartners); // PUT alias for frontend
 sellerPanelRouter.get("/shipping/rates", authseller, getShippingRates);
 sellerPanelRouter.post("/shipping/rates", authseller, updateShippingRates);
 sellerPanelRouter.get("/shipping/dimensions", authseller, getPackageDimensions);
